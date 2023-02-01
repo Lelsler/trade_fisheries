@@ -1,5 +1,5 @@
 # trade_fisheries
-This repository contains the data and code for the data-poor stock assessment analysis conducted in support of the following paper:
+This repository contains the data and code for the main analysis conducted in support of the following paper:
 
 Laura G. Elsler, Maartje Oostdijk, Jessica A. Gephart, Christopher M. Free, Junfu Zhao, Edward W. Tekwa, Elaine M. Bochniewicz, Alfredo Giron-Nava, Andrew F Johnson. "Global trade network patterns are coupled to fisheries sustainability”, submitted for publication as a Research Report in PNAS Nexus. 
 
