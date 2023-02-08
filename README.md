@@ -7,8 +7,6 @@ The repository is organized using the following structure:
 
     DATA - A folder containing the raw data, the code used to process the raw data, and the data generated from the processing
     CODE - A folder containing the code used to analyze the processed data and prepare tables/figures
-    TABLES - A folder containing tables generated for the project
-    FIGURES - A folder containing figures generated for the project
 
 This project was funded as part of a National Socio-Environmental Synthesis Center Graduate Pursuit: "Cross-scale exploitation patterns and marine population collapse in international seafood markets" under funding received from the National Science Foundation (NSF) [DBI-1639145]. LGE received funding from the European Research Council [682472 — MUSES]. AFJ was supported by NSF Grant [DEB‐1632648]. 
 
