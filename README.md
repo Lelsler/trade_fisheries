@@ -5,8 +5,8 @@ Laura G. Elsler, Maartje Oostdijk, Jessica A. Gephart, Christopher M. Free, Junf
 
 The repository is organized using the following structure:
 
-    DATA - A folder containing the raw data, the code used to process the raw data, and the data generated from the processing
-    CODE - A folder containing the code used to analyze the processed data and prepare tables/figures
+    code - A folder containing the code used to analyze the processed data and prepare tables/figures
+    data - A folder containing the raw data, the code used to process the raw data, and the data generated from the processing
 
 This project was funded as part of a National Socio-Environmental Synthesis Center Graduate Pursuit: "Cross-scale exploitation patterns and marine population collapse in international seafood markets" under funding received from the National Science Foundation (NSF) [DBI-1639145]. LGE received funding from the European Research Council [682472 — MUSES]. AFJ was supported by NSF Grant [DEB‐1632648]. 
 
