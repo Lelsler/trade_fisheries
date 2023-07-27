@@ -1,5 +1,5 @@
 # this file creates the network plots of selected species groups
-# Maartje Oostdijk, Laura Gabriele Elsler, WMU, SRC
+# Maartje Oostdijk, Laura Gabriele Elsler, SRC
 # 13 July 2022
 
 # clear workspace
@@ -18,20 +18,14 @@ datadir = "~/Documents/SESYNC/Files/FISHMAR-data/rq2/final_push/data" #LGE
 trade <- read.csv(file.path(datadir, "fish_trade.csv"), as.is=T)
 stocks  = read.csv(file.path(datadir1, "1950_2017_FAO_bbmsy_timeseries_merge.csv"), as.is=T)
 
-###################################################################################################################
-################################################    CLEAN DATA   ##################################################
-###################################################################################################################
-
-# modify stocks for plotting
-stocks_edited <- stocks %>%
-  group_by(exp_iso3, group, year) %>% 
-  summarize(mean(unique(super))) %>% # different super values for the same set of network characteristics, inflates standard deviations
-  mutate(stock_id = paste0(group, exp_iso3, year))
-
 ##################################################    HAKE   #####################################################
 
 trade=trade%>%
-  left_join(stocks_edited)
+  group_by(exp_iso3, imp_iso3, group, year)%>%
+  summarise(quantity_mt = sum(q))%>%
+  left_join(stocks)%>%
+  filter(!is.na(quantity_mt) & !is.na(super))%>%
+  ungroup()
 
 low_mod1 = trade %>%
   filter(group=="hake" & year==2005)%>%
@@ -39,7 +33,7 @@ low_mod1 = trade %>%
   filter(quantity_mt>10) # filter out "lower" volume trades
 
 low_mode1_edge= low_mod1%>%
-  select(exp_iso3, imp_iso3, quantity_mt)#for edges
+  dplyr::select(exp_iso3, imp_iso3, quantity_mt)#for edges
 
 g = graph_from_data_frame(low_mode1_edge, directed = TRUE)#construct graph from edges
 E(g)$weight <- low_mode1_edge$quantity_mt#edgeweight by traded quantity
@@ -64,6 +58,8 @@ nodeList = nodeList%>%
   mutate(total_exp_quantity = ifelse(is.na(total_exp_quantity), 0, total_exp_quantity))#size by export volume
 
 layout <- create_layout(g, layout = 'igraph', algorithm = 'nicely')
+
+
 
 ###################################################    EEL   ######################################################
 high_mod1 = trade %>%
@@ -179,12 +175,14 @@ layout4 <- create_layout(g4, layout = 'igraph', algorithm = 'nicely')#size by ex
 
 ##################################################    HAKE   ######################################################
 p1 = ggraph(layout, vertices = nodeList) +
-  geom_edge_link(alpha = 0.5, colour ="grey")+
-  geom_node_point(aes(fill = nodeList$super, size = (nodeList$total_exp_quantity+1)), shape = 21, stroke = 1) +
-  geom_node_text(aes(label = nodeList$country_name), repel=TRUE) +                   # "name" is automatically generated from the node IDs in the edges
-  theme_void()+
-  scale_fill_gradient(high="dark blue",low="white")+
-  labs(size="Total export volume",fill="Stock size estimate")+
+  geom_edge_link(alpha = 0.5, colour ="grey") +
+  geom_node_point(aes(fill = nodeList$super, size = (nodeList$total_exp_quantity + 1)), shape = 21, stroke = 1) +
+  geom_node_text(aes(label = nodeList$country_name), repel = TRUE, hjust = -0.5) +  # Set hjust to 0
+  theme(legend.position = "bottom") +
+  theme_void() +
+  scale_fill_gradient(high = "dark blue", low = "white", limits = c(0, 1.5)) +
+  scale_size_continuous(limits = c(0, 50000)) +
+  labs(size = "Total export volume", fill = "Stock size estimate") +
   ggtitle("Hake 2005")
 
 ###################################################    EEL   ######################################################
@@ -192,8 +190,10 @@ p2 = ggraph(layout2, vertices = nodeList2) +
   geom_edge_link(alpha = 0.5, colour ="grey")+
   geom_node_point(aes(fill = nodeList2$super, size = (nodeList2$total_exp_quantity+1)), shape = 21, stroke = 1) +
   geom_node_text(aes(label = nodeList2$country_name), repel=TRUE) +                   # "name" is automatically generated from the node IDs in the edges
+  theme(legend.position="bottom")+
   theme_void()+
-  scale_fill_gradient(high="dark blue",low="white")+
+  scale_fill_gradient(high = "dark blue", low = "white", limits = c(0, 1.5)) +
+  scale_size_continuous(limits = c(0, 50000)) +
   labs(size="Total export volume",fill="Stock size estimate")+
   ggtitle("Eel 2015")
 
@@ -202,24 +202,58 @@ p3 = ggraph(layout3, vertices = nodeList) +
   geom_edge_link(alpha = 0.5, colour ="grey")+
   geom_node_point(aes(fill = nodeList3$super, size = (nodeList3$total_exp_quantity+1)), shape = 21, stroke = 1) +
   geom_node_text(aes(label = nodeList3$country_name), repel=TRUE) +                   # "name" is automatically generated from the node IDs in the edges
+  theme(legend.position="bottom")+
   theme_void()+
-  scale_fill_gradient(high="dark blue",low="white")+
+  scale_fill_gradient(high = "dark blue", low = "white", limits = c(0, 1.5)) +
+  scale_size_continuous(limits = c(0, 50000)) +
   labs(size="Total export volume",fill="Stock size estimate")+
   ggtitle("Coalfish 1998")
 
 #################################################    SCALLOP   ######################################################
-p4 = ggraph(layout4, vertices = nodeList4) +
-  geom_edge_link(alpha = 0.5, colour ="grey")+
-  geom_node_point(aes(fill = nodeList4$super, size = (nodeList4$total_exp_quantity+1)), shape = 21, stroke = 1) +
-  geom_node_text(aes(label = nodeList4$country_name), repel=TRUE) +                   # "name" is automatically generated from the node IDs in the edges
-  theme_void()+
-  scale_fill_gradient(high="dark blue",low="white")+
-  labs(size="Total export volume",fill="Stock size estimate")+
+p4 <- ggraph(layout4, vertices = nodeList4) +
+  geom_edge_link(alpha = 0.5, colour = "grey") +
+  geom_node_point(aes(fill = nodeList4$super, size = (nodeList4$total_exp_quantity + 1)), shape = 21, stroke = 1) +
+  geom_node_text(aes(label = nodeList4$country_name), repel = TRUE) +
+  theme(legend.position="bottom")+
+  theme_void() +
+  scale_fill_gradient(high = "dark blue", low = "white", limits = c(0, 1.5)) +
+  scale_size_continuous(limits = c(0, 50000)) +
+  labs(size = "Total export volume", fill = "Stock size estimate") +
   ggtitle("Scallop 2003")
 
 #################################################    JOIN PLOT   #####################################################
-ggarrange(p1, p2,p4,p3,  common.legend = TRUE, legend="right")
+#ggarrange(p1, p2,p4,p3,  common.legend = TRUE, legend="right")
 #save plots
 # ggsave("~/Documents/SESYNC/Files/FISHMAR-data/rq2/final_push/figures/networks.png")
+library(patchwork)
 
+p1+ p2 + p3 + p4+ plot_layout(guides = "collect")& theme(legend.position = 'bottom')
+
+ggsave("networks.png", width = 10, height = 8, dpi=400)
+
+
+#################################################    TABLE ISO CODES & COUNTRY NAMES   #####################################################
+t1 = nodeList%>%
+  left_join(iso_codes)%>%
+  mutate(plot="Hakde 2005")%>%
+  distinct()
+
+t2 = nodeList%>%
+  left_join(iso_codes)%>%
+  mutate(plot="Eel 2015")%>%
+  distinct()
+
+t3 = nodeList%>%
+  left_join(iso_codes)%>%
+  mutate(plot="Coalfish 1998")%>%
+  distinct()
+
+t4 = nodeList%>%
+  left_join(iso_codes)%>%
+  mutate(plot="Scallop 2003")%>%
+  distinct()
+
+table = bind_rows(t1, t2, t3, t4)
+
+write.csv(table, "iso_codes_table.csv")
 
